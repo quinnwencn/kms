@@ -14,9 +14,8 @@ public:
     virtual ~HandlerInterface() = default;
     
     // Pure virtual function to handle requests
-    virtual http::response<http::string_body> Handle() = 0;
-
-    static http::response<http::string_body> GenerateMsg(http::status_code status, 
+    virtual http::response<http::string_body> Handle(const http::request<http::string_body>& req) = 0;
+    static http::response<http::string_body> GenerateMsg(http::status status, 
                                                          const std::string& body, 
                                                          bool keepAlive, 
                                                          int httpVersion = 11) {

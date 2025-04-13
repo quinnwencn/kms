@@ -1,15 +1,20 @@
 #ifndef HTTPSESSION_H
 #define HTTPSESSION_H
 
+#include <iostream>
 #include <boost/beast/http.hpp>
+#include <boost/beast/core.hpp>
 #include <boost/beast/ssl.hpp>
 #include <boost/asio/dispatch.hpp>
 #include <boost/asio/strand.hpp>
 
-#include "http/router.h"
+#include "route/router.h"
 
 namespace beast = boost::beast;
 namespace http = beast::http;  
+namespace net = boost::asio;
+namespace ssl = boost::asio::ssl;
+using tcp = boost::asio::ip::tcp;
 
 namespace Http {
 
@@ -34,6 +39,7 @@ private:
     void OnRead(beast::error_code ec, std::size_t transferedBytes);
     void DoWrite(http::response<http::string_body>&& res);
     void OnWrite(beast::error_code ec, std::size_t transferedBytes);
+    void OnShutdown(beast::error_code ec);
 
 private:
     beast::ssl_stream<beast::tcp_stream> stream_;

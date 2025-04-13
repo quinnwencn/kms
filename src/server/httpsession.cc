@@ -3,7 +3,7 @@
 namespace Http {
 
 HttpSession::HttpSession(tcp::socket&& socket, ssl::context& ctx) 
-    : stream_(std::move(socket), ctx_(ctx)) {
+    : stream_(std::move(socket), ctx) {
         // Set the timeout settings for the session
         beast::get_lowest_layer(stream_).expires_after(std::chrono::seconds(30));
 }
@@ -78,6 +78,15 @@ void HttpSession::OnWrite(beast::error_code ec, std::size_t transferedBytes) {
                             &HttpSession::OnShutdown,
                             shared_from_this())
                           );
+}
+
+void HttpSession::OnShutdown(beast::error_code ec) {
+    if (ec) {
+        Fail(ec, "OnShutdown");
+        return;
+    }
+
+    
 }
 
 }

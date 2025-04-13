@@ -1,24 +1,20 @@
 #ifndef AUTOREGISTER_H
 #define AUTOREGISTER_H
 
-#include "http/router.h"
-#include "http/handlerinterface.h"
+#include "route/router.h"
+#include "route/handlerinterface.h"
 
 #define REGISTER_EXIST_HANDLER(Path, Method, HandlerClass)                                          \
-namespace {                                                                                         \
     struct AutoRegister##HandlerClass {                                                             \
         AutoRegister##HandlerClass() {                                                              \
-                Router::Instance().AddRouter(Path, Method, std::make_unique<##HandlerClass>());     \
+                Http::Router::Instance().AddRoute(Path, Method, std::make_shared<HandlerClass>());  \
             }                                                                                       \
-        };                                                                                          \
-        static AutoRegister##HandlerClass _autoRegister##HandlerClass;                              \
-    } 
-
+    };                                                                                              \
+    static AutoRegister##HandlerClass _autoRegister##HandlerClass;                              
 
 #define HANDLER_CLASS(Path, Method, HandlerClass)                                                   \
-    class ##HandlerClass;                                                                           \
-    REGISTER_EXIST_HANDLER(Path, ##HandlerClass)                                                    \
-    class ##HandlerClass : public HandlerInterface
+class HandlerClass : public Http::HandlerInterface {                                          \
+    REGISTER_EXIST_HANDLER(Path, Method,HandlerClass)                                               
 
 
 #endif
