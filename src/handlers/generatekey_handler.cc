@@ -5,7 +5,7 @@ public:
     GenerateKeyHandler() = default;
     ~GenerateKeyHandler() = default;
 
-    http::response<http::string_body> Handle(const http::request<http::string_body>& req) override {
+    http::message_generator Handle(http::request<http::string_body>&& req) override {
         // Parse the request body
         // TODO finish the function
         return HandlerInterface::GenerateMsg(http::status::ok, 

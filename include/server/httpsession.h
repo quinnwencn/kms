@@ -28,17 +28,19 @@ static void Fail(beast::error_code ec, char const* what) {
 
 class HttpSession : public std::enable_shared_from_this<HttpSession> {
 public:
-    HttpSession(tcp::socket&& socket, ssl::context& ctx);
+    HttpSession(tcp::socket&& socket, ssl::context& ctx) : stream_(std::move(socket), ctx) {}
     ~HttpSession() = default;
 
     void Run();
 
 private:
-    void OnHandshake(beast::error_code ec, std::size_t usedBytes);
+    void OnRun();
+    void OnHandshake(beast::error_code ec);
     void DoRead();
     void OnRead(beast::error_code ec, std::size_t transferedBytes);
-    void DoWrite(http::response<http::string_body>&& res);
-    void OnWrite(beast::error_code ec, std::size_t transferedBytes);
+    void SendResponse(http::message_generator&& resp);
+    void OnWrite(bool keepAlive, beast::error_code ec, std::size_t transferedBytes);
+    void DoClose();
     void OnShutdown(beast::error_code ec);
 
 private:

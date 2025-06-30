@@ -7,3 +7,5 @@ add_library(kms SHARED
     $<TARGET_OBJECTS:server>
     $<TARGET_OBJECTS:route>
 )
+
+set_target_properties(kms PROPERTIES POSITION_INDEPENDENT_CODE ON)

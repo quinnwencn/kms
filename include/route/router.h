@@ -26,7 +26,7 @@ public:
         routes_.emplace(RouteKey(path, method), handler);
     }
 
-    http::response<http::string_body> Handle(const http::request<http::string_body>& req);
+    http::message_generator Handle(http::request<http::string_body>&& req);
 
 private:
     Router() = default;

@@ -5,3 +5,4 @@ target_include_directories(server PUBLIC
     ${Boost_INCLUDE_DIRS}
 )
 target_link_libraries(server PUBLIC ${Boost_LIBRARIES})
+set_target_properties(server PROPERTIES POSITION_INDEPENDENT_CODE ON)

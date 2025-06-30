@@ -7,17 +7,16 @@ class Kms(ConanFile):
     version = "0.1.0"
     description = "KMS is a simple C++ project for managing key-value stores."
     settings = "os", "compiler", "build_type", "arch"
-    generator = "CMakeDeps"
 
     default_options = {
-        "boost/*:shared": True,
         "openssl/*:shared": True,
+        "boost/*:shared": True,
         "gtest/*:shared": True
     }
 
     def requirements(self):
-        self.requires("boost/1.81.0")
         self.requires("openssl/3.0.8")
+        self.requires("boost/1.81.0", transitive_headers=True, transitive_libs=True)
         self.requires("gtest/1.13.0")
 
     def build_requirements(self):
@@ -29,6 +28,13 @@ class Kms(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_EXPORT_COMPILE_COMMANDS"] = True
+        openssl = self.dependencies.get("openssl")
+
+        # Inject OpenSSL's include path into global CXX flags,
+        # to fix boost can not find openssl/conf.h error
+        if openssl:
+            openssl_include = openssl.cpp_info.includedirs[0]
+            tc.cache_variables["CMAKE_CXX_FLAGS"] = f"-I{openssl_include}"
         tc.generate()
 
         deps = CMakeDeps(self)

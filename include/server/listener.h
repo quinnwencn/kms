@@ -19,6 +19,7 @@ public:
     Listener(net::io_context& ioc, ssl::context& ctx, tcp::endpoint endpoint);
     ~Listener() = default;
 
+    // Start accepting incoming connections
     void Run() { DoAccept(); }
 
 private:

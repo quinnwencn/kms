@@ -4,3 +4,5 @@ target_include_directories(route PUBLIC
     ${CMAKE_SOURCE_DIR}/include
     ${Boost_INCLUDE_DIRS}
 )
+
+set_target_properties(route PROPERTIES POSITION_INDEPENDENT_CODE ON)

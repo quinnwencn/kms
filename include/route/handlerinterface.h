@@ -1,6 +1,7 @@
 #ifndef HANDLERINTERFACE_H
 #define HANDLERINTERFACE_H
 
+#include <string_view>
 #include <boost/beast/http.hpp>
 
 namespace beast = boost::beast;
@@ -14,11 +15,11 @@ public:
     virtual ~HandlerInterface() = default;
     
     // Pure virtual function to handle requests
-    virtual http::response<http::string_body> Handle(const http::request<http::string_body>& req) = 0;
-    static http::response<http::string_body> GenerateMsg(http::status status, 
-                                                         const std::string& body, 
-                                                         bool keepAlive, 
-                                                         int httpVersion = 11) {
+    virtual http::message_generator Handle(http::request<http::string_body>&& req) = 0;
+    static http::message_generator GenerateMsg(http::status status,
+                                               std::string_view body,
+                                               bool keepAlive,
+                                               int httpVersion = 11) {
         http::response<http::string_body> res(status, httpVersion); // HTTP/1.1
         res.set(http::field::content_type, "application/json");
         res.keep_alive(keepAlive);
