@@ -6,6 +6,7 @@
 #include <memory>
 #include <boost/beast/http.hpp>
 
+#include <iostream>
 namespace beast = boost::beast;
 namespace http = beast::http;  
 
@@ -15,23 +16,23 @@ class HandlerInterface;
 
 class Router {
 public:
-    ~Router() = default;
-
     static Router& Instance() {
         static Router router;
         return router;
     }
-    
-    void AddRoute(const std::string& path, http::verb method, std::shared_ptr<HandlerInterface> handler) {
-        routes_.emplace(RouteKey(path, method), handler);
-    }
+
+    ~Router() = default;
 
     http::message_generator Handle(http::request<http::string_body>&& req);
 
 private:
-    Router() = default;
+    Router();
 
-private:
+    void AddRoute(const std::string& path, http::verb method, std::shared_ptr<HandlerInterface> handler) {
+        std::cout << "📌 Adding route: " << path << " (" << method << ")\n";
+        routes_.emplace(RouteKey(path, method), handler);
+    }
+
     class RouteKey {
     public:
         RouteKey(const std::string& path, http::verb method)

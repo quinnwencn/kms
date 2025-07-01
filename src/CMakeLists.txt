@@ -1,4 +1,4 @@
-add_subdirectory(handlers)
+add_subdirectory(handler)
 add_subdirectory(server)
 add_subdirectory(route)
 

@@ -1,6 +1,9 @@
 #include "autoregister.h"
+#include "http/handler/handlerinterface.h"
 
-HANDLER_CLASS("/key/generate", http::verb::post, GenerateKeyHandler)
+namespace Http {
+
+class GenerateKeyHandler : public HandlerInterface {
 public:
     GenerateKeyHandler() = default;
     ~GenerateKeyHandler() = default;
@@ -14,3 +17,7 @@ public:
             req.version());
     }
 };
+
+REGISTER_HANDLER("/key/generate", http::verb::post, GenerateKeyHandler)
+
+}
