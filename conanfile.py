@@ -11,13 +11,18 @@ class Kms(ConanFile):
     default_options = {
         "openssl/*:shared": True,
         "boost/*:shared": True,
-        "gtest/*:shared": True
+        "gtest/*:shared": True,
+        "tomlplusplus/*:shared": True,
+        "fmt/*:shared": True
     }
 
     def requirements(self):
         self.requires("openssl/3.0.8")
         self.requires("boost/1.81.0", transitive_headers=True, transitive_libs=True)
         self.requires("gtest/1.13.0")
+        self.requires("tomlplusplus/3.4.0")
+        self.requires("fmt/12.1.0")
+        self.requires("cli11/2.6.0")
 
     def build_requirements(self):
         self.build_requires("cmake/3.26.4")

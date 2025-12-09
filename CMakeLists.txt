@@ -3,7 +3,16 @@ project(KMS VERSION 0.1)
 set(CXX_STANDARD_REQUIRED 17)
 
 find_package(OpenSSL REQUIRED)
-find_package(Boost REQUIRED system thread beast)
+find_package(tomlplusplus CONFIG REQUIRED)
+find_package(Boost REQUIRED system thread beast log log_setup)
+find_package(fmt REQUIRED)
+find_package(CLI11 REQUIRED)
+
+add_library(logger INTERFACE)
+target_include_directories(logger INTERFACE
+        ${CMAKE_SOURCE_DIR}/include/kms
+        ${Boost_INCLUDE_DIRS})
+target_link_libraries(logger INTERFACE fmt::fmt)
 
 add_subdirectory(src)
 
@@ -18,4 +27,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     pthread
     Boost::system
     Boost::thread
-    ${OpenSSL_LIBRARIES})
+    ${OpenSSL_LIBRARIES}
+    tomlplusplus::tomlplusplus
+    fmt::fmt
+    CLI11::CLI11)
