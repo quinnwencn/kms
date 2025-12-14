@@ -5,13 +5,16 @@
 #pragma once
 
 #include <filesystem>
+#include "config.h"
 
 namespace kms {
 
 class Kms {
 public:
-    Kms(const std::filesystem::path& configFile) : configFile(configFile) {}
+    Kms(const Config& config) : config_(config) {}
     ~Kms() = default;
+
+    void Initialize();
     void Start();
 
 private:

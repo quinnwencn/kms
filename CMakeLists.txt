@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(KMS VERSION 0.1)
-set(CXX_STANDARD_REQUIRED 17)
+set(CXX_STANDARD_REQUIRED 20)
 
 find_package(OpenSSL REQUIRED)
 find_package(tomlplusplus CONFIG REQUIRED)
@@ -8,11 +8,11 @@ find_package(Boost REQUIRED system thread beast log log_setup)
 find_package(fmt REQUIRED)
 find_package(CLI11 REQUIRED)
 
-add_library(logger INTERFACE)
-target_include_directories(logger INTERFACE
-        ${CMAKE_SOURCE_DIR}/include/kms
-        ${Boost_INCLUDE_DIRS})
-target_link_libraries(logger INTERFACE fmt::fmt)
+#add_library(logger INTERFACE ${CMAKE_SOURCE_DIR}/src/logger/logger.cc)
+#target_include_directories(logger INTERFACE
+#        ${CMAKE_SOURCE_DIR}/include/kms
+#        ${Boost_INCLUDE_DIRS})
+#target_link_libraries(logger INTERFACE fmt::fmt)
 
 add_subdirectory(src)
 

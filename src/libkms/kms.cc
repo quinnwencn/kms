@@ -5,10 +5,45 @@
 #include "kms/kms.h"
 
 #include <vector>
+#include <thread>
 
-#include "listener.h"
+#include "http/handlerfactory.h"
+#include "http/listener.h"
+#include "kms/logger.h"
+#include "http/router.h"
 
 namespace kms {
+
+namespace {
+    std::unordered_map<std::string, http::verb> MethodMap {
+        {"DELETE", http::verb::delete_},
+        {"GET", http::verb::get},
+        {"HEAD", http::verb::head},
+        {"POST", http::verb::post},
+        {"PUT", http::verb::put},
+        {"CONNECT", http::verb::connect}
+    };
+}
+
+void Kms::Initialize() {
+    auto routeArray = config_.RouteConf().Routes();
+    for (const auto& route : routeArray) {
+        LOG_DEBUG("📌 Adding route: {}", route.Api());
+        auto it = MethodMap.find(route.Method());
+        if (it == MethodMap.end()) {
+            LOG_ERROR("Unsupported method: {} on api: {}", route.Method(), route.Api());
+            return;
+        }
+
+        auto h = Http::HandlerFactory::Instance().Create(route.Handler());
+        if (h == nullptr) {
+            LOG_ERROR("Can not find handler for: {}", route.Handler());
+            return;
+        }
+
+        Http::Router::Instance().AddRoute(route.Api(), it->second, h);
+    }
+}
 
 void Kms::Start() {
     auto threadNum = config_.ServerConf().ThreadNumber();

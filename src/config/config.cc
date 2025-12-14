@@ -8,11 +8,6 @@
 namespace kms {
 
 template <typename T>
-void UpdateFromToml(T& t, std::string_view name, const toml::table& tbl) {
-    t.LoadFromTable(*tbl[name].as_table());
-}
-
-template <typename T>
 void WriteToLog(T& t, std::string_view name) {
     t.WriteToLog(name);
 }
@@ -37,14 +32,14 @@ void TLSConfig::LoadFromTable(const toml::table& tbl) {
 }
 
 void TLSConfig::WriteToLog(std::string_view name) {
-    Logger::Trace("[{}]", name);
-    Logger::Trace("ca_cert_type = {}", static_cast<int>(caCertType_));
-    Logger::Trace("ca_certificate = ", caCertificate_);
-    Logger::Trace("cert_type = {}", static_cast<int>(certType_));
-    Logger::Trace("certificate = {}", certificate_);
-    Logger::Trace("key_type = {}", static_cast<int>(keyType_));
-    Logger::Trace("private_key = {}", privateKey_);
-    Logger::Trace("verify_peer = {}", verifyPeer_);
+    LOG_TRACE("[{}]", name);
+    LOG_TRACE("ca_cert_type = {}", static_cast<int>(caCertType_));
+    LOG_TRACE("ca_certificate = ", caCertificate_);
+    LOG_TRACE("cert_type = {}", static_cast<int>(certType_));
+    LOG_TRACE("certificate = {}", certificate_);
+    LOG_TRACE("key_type = {}", static_cast<int>(keyType_));
+    LOG_TRACE("private_key = {}", privateKey_);
+    LOG_TRACE("verify_peer = {}", verifyPeer_);
 }
 
 void ServerConfig::LoadFromTable(const toml::table &tbl) {
@@ -54,21 +49,49 @@ void ServerConfig::LoadFromTable(const toml::table &tbl) {
 }
 
 void ServerConfig::WriteToLog(std::string_view name) {
-    Logger::Trace("[{}]", name);
-    Logger::Trace("address_ = {}", address_);
-    Logger::Trace("port_ = {}", port_);
-    Logger::Trace("threadNumber_ = {}", threadNumber_);
+    LOG_TRACE("[{}]", name);
+    LOG_TRACE("address = {}", address_);
+    LOG_TRACE("port = {}", port_);
+    LOG_TRACE("thread_number = {}", threadNumber_);
 }
 
 void LogConfig::LoadFromTable(const toml::table &tbl) {
-    logDirs_ = tbl.at("log_dirs").value_or("");
-    logLevel_ = tbl.at("log_level").value_or(2);
+    logDirs_ = tbl.at("log_dir").value_or("");
+    logLevel_ = tbl.at("level").value_or(2);
 }
 
 void LogConfig::WriteToLog(std::string_view name) {
-    Logger::Trace("[{}]", name);
-    Logger::Trace("logDirs_ = {}", logDirs_.string());
-    Logger::Trace("logLevel_ = {}", logLevel_);
+    LOG_TRACE("[{}]", name);
+    LOG_TRACE("log_dir = {}", logDirs_.string());
+    LOG_TRACE("level = {}", logLevel_);
+}
+
+void RouteConfig::LoadFromTable(const toml::table &tbl) {
+    auto* items = tbl.at("routes").as_array();
+    if (items == nullptr) {
+        LOG_DEBUG("No routes in config file.");
+        return;
+    }
+
+    for (const auto& item : *items) {
+        const auto& route = *item.as_table();
+        routes_.emplace_back(Route{route["api"].value_or(""),
+                                route["method"].value_or(""),
+                                route["handler"].value_or("")});
+    }
+}
+
+void RouteConfig::WriteToLog(std::string_view name) {
+    for (const auto& route : routes_) {
+        LOG_TRACE("[[{}]]", name);
+        LOG_TRACE("api = {}", route.Api());
+        LOG_TRACE("method = {}", route.Method());
+        LOG_TRACE("handler = {}", route.Handler());
+    }
+}
+
+Config::Config(const std::filesystem::path& filename) {
+    LoadFromToml(filename);
 }
 
 void Config::LoadFromToml(const std::filesystem::path &configPath) {
@@ -77,16 +100,19 @@ void Config::LoadFromToml(const std::filesystem::path &configPath) {
     }
 
     auto tbl = toml::parse_file(configPath.string());
-    UpdateFromToml(tlsConfig_, "tls", tbl);
-    UpdateFromToml(serverConfig_, "server", tbl);
-    UpdateFromToml(logConfig_, "log", tbl);
+    tlsConfig_.LoadFromTable(*tbl["tls"].as_table());
+    serverConfig_.LoadFromTable(*tbl["server"].as_table());
+    logConfig_.LoadFromTable(*tbl["log"].as_table());
+    routeConfig_.LoadFromTable(tbl);
+
+    RecordConfig();
 }
 
 void Config::RecordConfig() {
-    Logger::Init(logConfig_);
     WriteToLog(tlsConfig_, "tls");
     WriteToLog(serverConfig_, "server");
     WriteToLog(logConfig_, "log");
+    WriteToLog(routeConfig_, "route");
 }
 
 }

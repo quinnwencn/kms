@@ -1,12 +1,11 @@
-#include "autoregister.h"
-#include "http/handler/handlerinterface.h"
+#include "handler_register.h"
 
 namespace Http {
 
 class GenerateKeyHandler : public HandlerInterface {
 public:
     GenerateKeyHandler() = default;
-    ~GenerateKeyHandler() = default;
+    ~GenerateKeyHandler() override = default;
 
     http::message_generator Handle(http::request<http::string_body>&& req) override {
         // Parse the request body
@@ -18,6 +17,6 @@ public:
     }
 };
 
-REGISTER_HANDLER("/key/generate", http::verb::post, GenerateKeyHandler)
+static Registrar<GenerateKeyHandler> _generate_key_handler("KeyGenerate");
 
 }

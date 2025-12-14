@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <string>
 #include <string_view>
+#include <vector>
 #include <toml++/toml.hpp>
 
 #include "types.h"
@@ -78,13 +79,42 @@ private:
     int logLevel_;
 };
 
+class RouteConfig : public IConfig {
+public:
+    class Route {
+    public:
+        Route() = default;
+        Route(std::string_view api, std::string_view method, std::string_view handler) :
+            api_(api), method_(method), handler_(handler) {}
+        ~Route() = default;
+
+        const std::string& Api() const { return api_; }
+        const std::string& Method() const { return method_; }
+        const std::string& Handler() const { return handler_; }
+
+    private:
+        std::string api_;
+        std::string method_;
+        std::string handler_;
+    };
+
+    RouteConfig() = default;
+    ~RouteConfig() override = default;
+
+    void LoadFromTable(const toml::table &tbl) override;
+    void WriteToLog(std::string_view name) override;
+    const std::vector<Route>& Routes() const { return routes_; }
+
+private:
+    std::vector<Route> routes_;
+};
+
 class Config {
 public:
     Config() = default;
     explicit Config(const std::filesystem::path& filename);
 
     void LoadFromToml(const std::filesystem::path& configPath);
-    void RecordConfig();
 
     const TLSConfig& TLSConf() const {
         return tlsConfig_;
@@ -98,10 +128,17 @@ public:
         return logConfig_;
     }
 
+    const RouteConfig& RouteConf() const {
+        return routeConfig_;
+    }
+
 private:
+    void RecordConfig();
+
     TLSConfig tlsConfig_;
     ServerConfig serverConfig_;
     LogConfig logConfig_;
+    RouteConfig routeConfig_;
 };
 
 }
